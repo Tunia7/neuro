@@ -1,0 +1,28 @@
+begintemplate IAFneuron
+	
+	public soma, IAF, x, y, z, addConnection
+	objref IAF
+	create soma
+	proc init(){
+	  x = $1
+	  y = $2
+	  z = $3
+	}
+	  soma{
+	    pt3dclear()
+	    pt3dadd(x,y,z,10)
+	    pt3dadd(x+10,y,z,10)
+
+	    IAF = new IntFire1(0.5)
+	    IAF.tau = 10
+	    IAF.refrac = 5
+	  
+	}
+	proc addConnection(){
+		soma{
+			pt3dadd(x+5,y,z,1)
+			pt3dadd($1+5, $2, $3, 1)
+		}
+	}
+
+endtemplate IAFneuron

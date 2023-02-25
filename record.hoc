@@ -1,0 +1,22 @@
+objref tvec, vec
+vec = new Vector()
+tvec = new Vector()
+NetInput.record(tvec,vec,0)
+
+objref timevec, idvec, tobj, nil //nil nie powolany do istnienia, ale ma swoj wskaznik
+timevec = new Vector()
+idvec = new Vector()
+
+for i=0, 3 {
+tobj = new NetCon (PYCell[i], nil)
+tobj.record(timevec, idvec, i+1)
+
+objref tobj 
+
+objref ga
+proc plotraster() {
+  ga = new Graph()
+  ga.size(0,tstop, 0, nneurons)
+  vec.mark(ga, tvec, "|")
+  idvec.mark(ga, timevec, "|")
+}

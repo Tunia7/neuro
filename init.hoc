@@ -1,0 +1,4 @@
+load_file("nrngui.hoc")
+load_file("IAF.hoc")
+load_file("inhibitoryneurons.hoc")
+load_file("main.hoc")

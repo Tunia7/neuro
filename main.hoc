@@ -1,0 +1,130 @@
+dt=0.025
+tstart=0
+tstop=100
+
+
+//objref TRESHOLD, DELAY, WEIGHT, CONNECTION_PROB, NCells, MAXNUMBER_CONNECTION. NETDIM_X, NETDIM_Z, NETDIM_Y
+TRESHOLD = 0.6
+DELAY = 0
+WEIGHT = 0.3
+CONNECTION_PROB = 0.1
+NCells = 125 //25 hamujących + 100 IAF
+MAXNUMBER_CONNECTION = NCells*NCells
+NETDIM_X = 5
+NETDIM_Y = 5
+NETDIM_Z = 5
+
+
+//making neurons
+objref neuron[NCells]
+
+
+for i=0, NETDIM_X-1{
+	for j=0, NETDIM_Y-1{
+		for k=0, NETDIM_Z-1{
+			neuron[l]=new IAFneuron(i*100,j*100,k*100)
+}
+}
+}
+
+
+//connecting
+NConnections = 0
+NPosConnection = 0
+objref prob
+prob = new Random()
+objref CellConnection[MAXNUMBER_CONNECTION]
+for i = 0, NCells-1{
+  for j = 0, NCells-1{
+	NPosConnection = NPosConnection + 1
+	aprob = prob.uniform(0,1)
+	if ((aprob <=CONNECTION_PROB)&&(i!=j)){
+
+		adist = 100
+		CellConnection[NConnections] = new NetCon(neuron[i].IAF, neuron[j].IAF, TRESHOLD, DELAY*adist, WEIGHT)
+
+		NConnections = NConnections + 1
+print NConnections
+	}
+  }
+}
+print NConnections
+
+//Presynapse
+objref StimTrigger, NetInput
+create Presynapse
+
+Presynapse {
+	pt3dclear()
+	pt3dadd(0,0,0,10)
+	pt3dadd(10,0,0,10)
+	StimTrigger = new NetStim(0.5)
+	StimTrigger.start = 10
+	StimTrigger.interval = 5
+	StimTrigger.number = 50
+	StimTrigger.noise = 0
+	NetInput = new NetCon(StimTrigger, neuron[0].IAF, 0.5, 0, 0.3)
+}
+
+
+proc step() { local i
+    for i=1, nstep_steprun { advance() }
+    Plot()    
+    for i=0, NCells-1 {
+       neuron[i].soma.v(0.5) = neuron[i].IAF.M
+   } 
+}
+
+
+//plots
+objectvar g[20]
+ngraph = 0
+
+proc addgraph() { local ii
+  ngraph = ngraph+1
+  ii = ngraph-1
+  g[ii] = new Graph()
+  g[ii].size(tstart,tstop,$2,$3)
+  g[ii].xaxis()
+  g[ii].yaxis()
+  g[ii].addexpr($s1,4,0)
+  g[ii].save_name("graphList[0].")
+  graphList[0].append(g[ii])
+}
+objref tvec, vec
+vec = new Vector()
+tvec = new Vector()
+NetInput.record(tvec, vec, 0)
+
+objref timevec, idvec, tobj, nil
+timevec = new Vector()
+idvec = new Vector()
+
+for i=0, NCells-1 {
+	tobj = new NetCon(neuron[i].IAF, nil)
+	tobj.record(timevec, idvec, i+1)
+}
+
+
+objref ga
+proc plotraster() {
+  ga = new Graph()
+  ga.size(0,tstop, 0, nneurons)
+  vec.mark(ga, tvec, "|")
+  idvec.mark(ga, timevec, "|")
+}
+
+
+////
+
+access neuron[0].soma
+addgraph("neuron[0].IAF.M", -2, 3)
+addgraph("neuron[1].IAF.M", -2, 3)
+
+proc go() {
+ init()
+ run()
+ plotraster()
+ }
+
+
